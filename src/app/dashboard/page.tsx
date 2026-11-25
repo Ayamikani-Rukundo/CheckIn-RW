@@ -4,9 +4,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { format, subMonths } from "date-fns";
 import {
-  BarChart3, ClipboardCheck, KeyRound, LayoutDashboard, LogOut, Menu, Moon, Sun, Users, UserRoundCog, X,
+  BarChart3, ClipboardCheck, Eye, EyeOff, KeyRound, LayoutDashboard, LogOut, Menu, Moon, Sun, Users, UserRoundCog, X,
 } from "lucide-react";
 import { AttendancePanel } from "@/components/dashboard/attendance-panel";
+import { Dialog } from "@/components/dashboard/dialog";
 import { InvitationsPanel } from "@/components/dashboard/invitations-panel";
 import { Overview } from "@/components/dashboard/overview";
 import { ReportsPanel } from "@/components/dashboard/reports-panel";
@@ -42,6 +43,14 @@ export default function DashboardPage() {
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
 
   const loadData = useCallback(async () => {
     setError("");
@@ -154,6 +163,52 @@ export default function DashboardPage() {
     router.replace("/");
   }
 
+  function openProfile() {
+    setPasswordError("");
+    setPasswordSuccess("");
+    setProfileDialogOpen(true);
+  }
+
+  function closeProfile() {
+    if (changingPassword) return;
+    setProfileDialogOpen(false);
+    setNewPassword("");
+    setConfirmPassword("");
+    setPasswordError("");
+    setPasswordSuccess("");
+  }
+
+  async function changePassword(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setPasswordError("");
+    setPasswordSuccess("");
+    if (newPassword.length < 8) {
+      setPasswordError("Use at least 8 characters for your new password.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("The passwords do not match.");
+      return;
+    }
+
+    setChangingPassword(true);
+    try {
+      const supabase = createClient();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw new Error(sessionError.message);
+      if (!session) throw new Error("Your sign-in has expired. Sign in again before changing your password.");
+      const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+      if (updateError) throw new Error(updateError.message);
+      setPasswordSuccess("Your password has been changed.");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (updateError) {
+      setPasswordError(updateError instanceof Error ? updateError.message : "Could not change your password.");
+    } finally {
+      setChangingPassword(false);
+    }
+  }
+
   if (loading) {
     return <main className="portal-loading">Loading your attendance records…</main>;
   }
@@ -180,8 +235,10 @@ export default function DashboardPage() {
           ))}
         </nav>
         <div className="sidebar-user">
-          <div className="avatar">{initials}</div>
-          <div><strong>{profile.full_name}</strong><small>{profile.role}</small></div>
+          <button className="sidebar-profile" onClick={openProfile} aria-label="Open profile and change password">
+            <span className="avatar">{initials}</span>
+            <span className="sidebar-profile-info"><strong>{profile.full_name}</strong><small>{profile.role} · Profile</small></span>
+          </button>
           <button onClick={logout} aria-label="Sign out"><LogOut size={15} /></button>
         </div>
       </aside>
@@ -192,7 +249,8 @@ export default function DashboardPage() {
           <div className="portal-title"><span>NLS CHRISTIAN FELLOWSHIP</span><strong>Attendance MIS</strong></div>
           <div className="top-actions">
             <span className="top-date">{format(new Date(), "EEE, d MMM yyyy")}</span>
-            <button onClick={toggleTheme} aria-label="Toggle theme">{dark ? <Sun size={16} /> : <Moon size={16} />}</button>
+            <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">{dark ? <Sun size={16} /> : <Moon size={16} />}</button>
+            <button className="mobile-profile" onClick={openProfile} aria-label="Open profile and change password"><UserRoundCog size={17} /></button>
           </div>
         </header>
 
@@ -225,6 +283,44 @@ export default function DashboardPage() {
           </button>
         ))}
       </nav>
+      {profileDialogOpen && (
+        <Dialog title="Your profile" onClose={closeProfile}>
+          <div className="profile-dialog-body">
+            <div className="profile-identity">
+              <span className="avatar">{initials}</span>
+              <div><strong>{profile.full_name}</strong><span>{profile.email}</span><small>{profile.role}</small></div>
+            </div>
+            {passwordSuccess ? (
+              <div className="dialog-form">
+                <p className="profile-password-success" role="status">{passwordSuccess}</p>
+                <div className="dialog-actions"><button className="small-primary" onClick={closeProfile}>Done</button></div>
+              </div>
+            ) : (
+              <form className="dialog-form" onSubmit={changePassword}>
+                <div className="profile-password-heading"><KeyRound size={15} /><strong>Change password</strong></div>
+                <p className="dialog-description">Choose a new password with at least 8 characters.</p>
+                <label>New password
+                  <div className="password-field profile-password-field">
+                    <input type={showNewPassword ? "text" : "password"} autoComplete="new-password" minLength={8} required value={newPassword} onChange={(event) => setNewPassword(event.target.value)} />
+                    <button type="button" onClick={() => setShowNewPassword((value) => !value)} aria-label={showNewPassword ? "Hide new password" : "Show new password"}>{showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button>
+                  </div>
+                </label>
+                <label>Confirm new password
+                  <div className="password-field profile-password-field">
+                    <input type={showConfirmPassword ? "text" : "password"} autoComplete="new-password" minLength={8} required value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} />
+                    <button type="button" onClick={() => setShowConfirmPassword((value) => !value)} aria-label={showConfirmPassword ? "Hide password confirmation" : "Show password confirmation"}>{showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button>
+                  </div>
+                </label>
+                {passwordError && <p className="inline-error" role="alert">{passwordError}</p>}
+                <div className="dialog-actions">
+                  <button type="button" className="secondary-button" onClick={closeProfile}>Cancel</button>
+                  <button type="submit" className="small-primary" disabled={changingPassword}>{changingPassword ? "Updating..." : "Update password"}</button>
+                </div>
+              </form>
+            )}
+          </div>
+        </Dialog>
+      )}
     </main>
   );
 }
