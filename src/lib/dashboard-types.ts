@@ -1,5 +1,20 @@
 export type AccessLevel = "view" | "edit" | "add";
 
+export type InvitationCode = {
+  id: string;
+  code: string;
+  role: string;
+  can_view_records: boolean;
+  can_edit_records: boolean;
+  can_add_records: boolean;
+  created_by: string | null;
+  expires_at: string | null;
+  max_uses: number;
+  uses: number;
+  active: boolean;
+  created_at: string;
+};
+
 export type UserProfile = {
   id: string;
   full_name: string;

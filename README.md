@@ -21,3 +21,5 @@ Add these environment variables in the Vercel project settings using the values 
 Keep `SUPABASE_SERVICE_ROLE_KEY` server-only. Never add `.env.local` or its values to Git.
 
 The access migration promotes the earliest existing profile to the initial Super Admin if no Super Admin exists yet.
+
+Before using the invitation manager, run `supabase/migrations/20261125190000_invitation_permissions.sql` once in the existing Supabase SQL Editor. It adds invitation access settings and makes claimed codes apply those permissions to new accounts.

@@ -19,6 +19,7 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [selectedRole, setSelectedRole] = useState("Viewer");
+  const [selectedAccess, setSelectedAccess] = useState("View only");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -38,6 +39,7 @@ export default function RegisterPage() {
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "The invitation code is invalid.");
       setSelectedRole(result.role);
+      setSelectedAccess(result.can_add_records ? "View, edit and add" : result.can_edit_records ? "View and edit" : "View only");
       setError("");
       setStep(2);
     } catch (verifyError) {
@@ -109,6 +111,7 @@ export default function RegisterPage() {
                 <label><span>Full name</span><input required value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder="Your full name" /></label>
                 <label><span>Email address</span><input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@nlscf.org" /></label>
                 <label><span>Assigned role</span><input value={selectedRole} readOnly /></label>
+                <label><span>Record access</span><input value={selectedAccess} readOnly /></label>
                 <label><span>Password</span><div className="password-field"><input required type={show ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Create a password" /><button type="button" onClick={() => setShow((value) => !value)}>{show ? <EyeOff size={17} /> : <Eye size={17} />}</button></div></label>
                 <label><span>Confirm password</span><div className="password-field"><input required type={showConfirm ? "text" : "password"} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Repeat password" /><button type="button" onClick={() => setShowConfirm((value) => !value)}>{showConfirm ? <EyeOff size={17} /> : <Eye size={17} />}</button></div></label>
               </div>

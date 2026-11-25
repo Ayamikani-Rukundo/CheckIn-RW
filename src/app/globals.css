@@ -370,6 +370,29 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .user-table td { vertical-align: middle; }
 .user-actions { display: flex; align-items: center; gap: 5px; }
 .mobile-user-list { display: none; }
+.invitation-panel .panel-heading .small-primary { border: 0; background: #0755b8; color: #fff; }
+.invitation-intro { display: flex; align-items: center; gap: 8px; padding: 10px 13px; border-bottom: 1px solid var(--app-border); color: #718096; font-size: 9px; }
+.invitation-intro > span:nth-child(2) { flex: 1; }
+.invitation-notice { margin: 0; padding: 9px 13px; color: #187447; background: #effaf3; font-size: 10px; }
+.invitation-list { display: grid; gap: 8px; padding: 11px; }
+.invitation-card { min-width: 0; padding: 11px; border: 1px solid var(--app-border); border-radius: 6px; background: var(--surface, #fff); }
+.invitation-card-top, .invitation-code-group, .invitation-card-actions { display: flex; align-items: center; gap: 6px; }
+.invitation-card-top { justify-content: space-between; flex-wrap: wrap; }
+.invitation-code-group { min-width: 0; }
+.invitation-code-group code { color: #092b63; font-size: 12px; font-weight: 800; letter-spacing: .5px; user-select: all; }
+.invitation-status { border-radius: 10px; padding: 3px 7px; color: #187447; background: #effaf3; font-size: 8px; font-weight: 700; }
+.invitation-status.disabled, .invitation-status.used-up { color: #8b5a16; background: #fff6df; }
+.invitation-status.expired { color: #a22d36; background: #fff0f1; }
+.invitation-card-meta { display: flex; flex-wrap: wrap; gap: 5px 16px; margin-top: 8px; color: #8490a2; font-size: 9px; }
+.invitation-card-actions { flex-wrap: wrap; }
+.invite-action { min-height: 28px; padding: 0 7px; font-size: 9px; }
+.invitation-card-actions .account-state { min-height: 25px; }
+.app-shell[data-theme="dark"] .invitation-card { background: #141414; }
+.app-shell[data-theme="dark"] .invitation-code-group code { color: #c1d6f5; }
+.app-shell[data-theme="dark"] .invitation-notice { color: #a7e0bd; background: #15241b; }
+.app-shell[data-theme="dark"] .invitation-status { color: #a7e0bd; background: #15241b; }
+.app-shell[data-theme="dark"] .invitation-status.disabled, .app-shell[data-theme="dark"] .invitation-status.used-up { color: #f0c77e; background: #2b2416; }
+.app-shell[data-theme="dark"] .invitation-status.expired { color: #f0a3ab; background: #321b1e; }
 .sub-cell { display: block; margin-top: 2px; font-size: 8px; color: #94a0b0; }
 .compact-select { max-width: 180px; }
 .compact-select:disabled { opacity: .75; }
@@ -468,6 +491,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .mobile-user-card label { display: grid; gap: 4px; color: #69768a; font-size: 9px; }
   .mobile-user-card .compact-select { max-width: none; width: 100%; height: 34px; }
   .mobile-user-footer { border-top: 1px solid var(--app-border); padding-top: 8px; }
+  .invitation-intro { align-items: flex-start; flex-wrap: wrap; padding-inline: 10px; }
+  .invitation-card { padding: 9px; }
+  .invitation-card-top { align-items: flex-start; }
+  .invitation-card-actions { width: 100%; }
+  .invitation-card-actions > button { flex: 1; justify-content: center; }
   .session-select-row .session-delete { opacity: 1; }
   .pie-layout { justify-content: space-evenly; }
   .dialog-overlay { align-items: end; padding: 0; }

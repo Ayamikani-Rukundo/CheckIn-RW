@@ -17,5 +17,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "The invitation code is invalid or has expired." }, { status: 400 });
   }
 
-  return NextResponse.json({ role: data[0].role });
+  return NextResponse.json({
+    role: data[0].role,
+    can_view_records: data[0].can_view_records,
+    can_edit_records: data[0].can_edit_records,
+    can_add_records: data[0].can_add_records,
+  });
 }

@@ -4,9 +4,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { format, subMonths } from "date-fns";
 import {
-  BarChart3, ClipboardCheck, LayoutDashboard, LogOut, Menu, Moon, Sun, Users, UserRoundCog, X,
+  BarChart3, ClipboardCheck, KeyRound, LayoutDashboard, LogOut, Menu, Moon, Sun, Users, UserRoundCog, X,
 } from "lucide-react";
 import { AttendancePanel } from "@/components/dashboard/attendance-panel";
+import { InvitationsPanel } from "@/components/dashboard/invitations-panel";
 import { Overview } from "@/components/dashboard/overview";
 import { ReportsPanel } from "@/components/dashboard/reports-panel";
 import { StudentsPanel } from "@/components/dashboard/students-panel";
@@ -15,7 +16,7 @@ import { createClient } from "@/lib/supabase/client";
 import { usePersistedTheme } from "@/lib/use-persisted-theme";
 import type { AttendanceRecord, AttendanceSession, Student, UserProfile } from "@/lib/dashboard-types";
 
-type DashboardSection = "Overview" | "Students" | "Attendance" | "Reports" | "Users";
+type DashboardSection = "Overview" | "Students" | "Attendance" | "Reports" | "Invitations" | "Users";
 
 async function fetchAllPages<T>(
   fetchPage: (start: number, end: number) => Promise<{ data: T[] | null; error: { message: string } | null }>,
@@ -134,12 +135,17 @@ export default function DashboardPage() {
         { label: "Reports", icon: BarChart3 },
       );
     }
-    if (isAdmin) items.push({ label: "Users", icon: UserRoundCog });
+    if (isAdmin) {
+      items.push(
+        { label: "Invitations", icon: KeyRound },
+        { label: "Users", icon: UserRoundCog },
+      );
+    }
     return items;
   }, [canView, isAdmin]);
 
   useEffect(() => {
-    if (active === "Users" && !isAdmin) setActive("Overview");
+    if ((active === "Users" || active === "Invitations") && !isAdmin) setActive("Overview");
     if ((active === "Students" || active === "Attendance" || active === "Reports") && !canView) setActive("Overview");
   }, [active, canView, isAdmin]);
 
@@ -206,7 +212,9 @@ export default function DashboardPage() {
                   ? <AttendancePanel profile={profile} students={students} sessions={sessions} records={records} onChanged={loadData} />
                   : active === "Reports"
                     ? <ReportsPanel students={students} sessions={sessions} records={records} />
-                    : <UsersPanel currentUser={profile} />}
+                    : active === "Invitations"
+                      ? <InvitationsPanel currentUser={profile} />
+                      : <UsersPanel currentUser={profile} />}
           {active !== "Users" && error && <div className="portal-inline-error">{error}</div>}
         </div>
       </section>
